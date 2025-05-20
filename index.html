@@ -7,7 +7,7 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f5f5f5;
+      background: white;
       margin: 0;
       padding: 2em;
     }
@@ -26,7 +26,7 @@
       display: block;
       margin-top: 1em;
     }
-    input, select, button {
+    input, button {
       width: 100%;
       padding: 0.6em;
       margin-top: 0.3em;
@@ -41,48 +41,63 @@
       border: none;
     }
     .lang-switch {
-      text-align: right;
+      display: flex;
+      justify-content: center;
       margin-bottom: 1em;
+      gap: 10px;
     }
-    .lang-switch button {
-      background: transparent;
-      border: none;
-      color: #333;
-      font-weight: bold;
-      margin-left: 0.5em;
+    .lang-switch img {
+      width: 30px;
+      height: 20px;
       cursor: pointer;
+      border: 2px solid transparent;
+      border-radius: 3px;
+    }
+    .lang-switch img:hover {
+      border-color: #e7c670;
     }
     .total {
       font-weight: bold;
       margin-top: 1em;
       text-align: center;
     }
+    .hidden {
+      display: none;
+    }
+    .fade {
+      animation: fadeIn 0.6s ease-out forwards;
+    }
+    @keyframes fadeIn {
+      from {opacity: 0; transform: translateY(10px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
   </style>
 </head>
 <body>
 <div class="container">
+
   <div class="lang-switch">
-    <button onclick="setLang('en')">EN</button>
-    <button onclick="setLang('ru')">RU</button>
-    <button onclick="setLang('he')">HE</button>
+    <img src="https://flagcdn.com/w40/gb.png" alt="EN" onclick="setLang('en')">
+    <img src="https://flagcdn.com/w40/ru.png" alt="RU" onclick="setLang('ru')">
+    <img src="https://flagcdn.com/w40/il.png" alt="HE" onclick="setLang('he')">
   </div>
 
   <h2 data-lang-en="Ticket Order" data-lang-ru="Заказ билетов" data-lang-he="הזמנת כרטיסים">Ticket Order</h2>
 
-  <form id="ticketForm" action="https://formsubmit.co/2mmedia.il@gmail.com" method="POST">
+  <form id="ticketForm" action="https://formsubmit.co/ajax/2mmedia.il@gmail.com" method="POST">
     <label data-lang-en="Competition Day Tickets (40₪ each)" 
            data-lang-ru="Билеты на конкурсный день (40₪ за шт.)" 
            data-lang-he="כרטיסים ליום התחרות (₪40 כל אחד)">
       Competition Day Tickets (40₪ each)
     </label>
-    <input type="number" name="competition_tickets" min="0" value="0" oninput="calculateTotal()">
+    <input type="number" name="competition_tickets" min="0" value="0" oninput="calculateTotal()" required>
 
     <label data-lang-en="Gala Concert Tickets (60₪ each)" 
            data-lang-ru="Билеты на гала-концерт (60₪ за шт.)" 
            data-lang-he="כרטיסים לקונצרט הגאלה (₪60 כל אחד)">
       Gala Concert Tickets (60₪ each)
     </label>
-    <input type="number" name="gala_tickets" min="0" value="0" oninput="calculateTotal()">
+    <input type="number" name="gala_tickets" min="0" value="0" oninput="calculateTotal()" required>
 
     <label data-lang-en="First Name" data-lang-ru="Имя" data-lang-he="שם פרטי">First Name</label>
     <input type="text" name="first_name" required>
@@ -100,9 +115,8 @@
 
     <div class="total" id="totalDisplay">Total: 0₪</div>
     <input type="hidden" name="calculated_total" id="totalField">
-    <input type="hidden" name="_next" value="https://example.com/thank-you.html">
     <input type="text" name="_honey" style="display:none">
-    
+
     <button type="submit" 
             data-lang-en="Submit Order" 
             data-lang-ru="Отправить заказ" 
@@ -111,12 +125,21 @@
     </button>
   </form>
 
-  <p style="text-align:center; margin-top:1em;" 
-     data-lang-en="We will contact you to arrange payment." 
-     data-lang-ru="С вами свяжутся для оплаты." 
-     data-lang-he="ניצור איתך קשר כדי להסדיר את התשלום.">
-    We will contact you to arrange payment.
-  </p>
+  <div id="thankYou" class="hidden fade" style="text-align: center; margin-top: 2em;">
+    <p id="message"
+       data-lang-en="We will contact you to arrange payment." 
+       data-lang-ru="С вами свяжутся для оплаты." 
+       data-lang-he="ניצור איתך קשר כדי להסדיר את התשלום.">
+      We will contact you to arrange payment.
+    </p>
+    <button onclick="resetForm()" 
+            data-lang-en="Add Another Order" 
+            data-lang-ru="Добавить ещё заказ" 
+            data-lang-he="הוסף הזמנה נוספת">
+      Add Another Order
+    </button>
+  </div>
+
 </div>
 
 <script>
@@ -136,17 +159,38 @@
     if (count >= 3) {
       total = Math.round(total * 0.65); // 35% discount
     }
-    document.getElementById("totalDisplay").textContent = (langLabel('Total') || 'Total') + ": " + total + "₪";
+    document.getElementById("totalDisplay").textContent = "Total: " + total + "₪";
     document.getElementById("totalField").value = total + "₪";
   }
 
-  function langLabel(label) {
-    const el = Array.from(translations).find(e => e.textContent.includes(label));
-    if (!el) return null;
-    return el.textContent.split(":")[0];
-  }
-
   calculateTotal();
+
+  document.getElementById("ticketForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    const form = e.target;
+    const data = new FormData(form);
+    fetch(form.action, {
+      method: "POST",
+      body: data,
+      headers: { 'Accept': 'application/json' }
+    }).then(response => {
+      if (response.ok) {
+        form.classList.add("hidden");
+        document.getElementById("thankYou").classList.remove("hidden");
+        document.getElementById("thankYou").classList.add("fade");
+      } else {
+        alert("There was a problem sending the form.");
+      }
+    });
+  });
+
+  function resetForm() {
+    const form = document.getElementById("ticketForm");
+    form.reset();
+    calculateTotal();
+    form.classList.remove("hidden");
+    document.getElementById("thankYou").classList.add("hidden");
+  }
 </script>
 </body>
 </html>
