@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ticket Order</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 2em;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 2em;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #ccc;
+    }
+    h2 {
+      text-align: center;
+    }
+    label {
+      display: block;
+      margin-top: 1em;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 0.6em;
+      margin-top: 0.3em;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+    button {
+      background: #e7c670;
+      font-weight: bold;
+      cursor: pointer;
+      border: none;
+    }
+    .lang-switch {
+      text-align: right;
+      margin-bottom: 1em;
+    }
+    .lang-switch button {
+      background: transparent;
+      border: none;
+      color: #333;
+      font-weight: bold;
+      margin-left: 0.5em;
+      cursor: pointer;
+    }
+    .total {
+      font-weight: bold;
+      margin-top: 1em;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="lang-switch">
+    <button onclick="setLang('en')">EN</button>
+    <button onclick="setLang('ru')">RU</button>
+    <button onclick="setLang('he')">HE</button>
+  </div>
+
+  <h2 data-lang-en="Ticket Order" data-lang-ru="Заказ билетов" data-lang-he="הזמנת כרטיסים">Ticket Order</h2>
+
+  <form id="ticketForm" action="https://formsubmit.co/2mmedia.il@gmail.com" method="POST">
+    <label data-lang-en="Competition Day Tickets (40₪ each)" 
+           data-lang-ru="Билеты на конкурсный день (40₪ за шт.)" 
+           data-lang-he="כרטיסים ליום התחרות (₪40 כל אחד)">
+      Competition Day Tickets (40₪ each)
+    </label>
+    <input type="number" name="competition_tickets" min="0" value="0" oninput="calculateTotal()">
+
+    <label data-lang-en="Gala Concert Tickets (60₪ each)" 
+           data-lang-ru="Билеты на гала-концерт (60₪ за шт.)" 
+           data-lang-he="כרטיסים לקונצרט הגאלה (₪60 כל אחד)">
+      Gala Concert Tickets (60₪ each)
+    </label>
+    <input type="number" name="gala_tickets" min="0" value="0" oninput="calculateTotal()">
+
+    <label data-lang-en="First Name" data-lang-ru="Имя" data-lang-he="שם פרטי">First Name</label>
+    <input type="text" name="first_name" required>
+
+    <label data-lang-en="Last Name" data-lang-ru="Фамилия" data-lang-he="שם משפחה">Last Name</label>
+    <input type="text" name="last_name" required>
+
+    <label data-lang-en="Phone Number" data-lang-ru="Номер телефона" data-lang-he="מספר טלפון">Phone Number</label>
+    <input type="tel" name="phone" required>
+
+    <label data-lang-en="Email (optional)" data-lang-ru="Email (необязательно)" data-lang-he="אימייל (לא חובה)">
+      Email (optional)
+    </label>
+    <input type="email" name="email">
+
+    <div class="total" id="totalDisplay">Total: 0₪</div>
+    <input type="hidden" name="calculated_total" id="totalField">
+    <input type="hidden" name="_next" value="https://example.com/thank-you.html">
+    <input type="text" name="_honey" style="display:none">
+    
+    <button type="submit" 
+            data-lang-en="Submit Order" 
+            data-lang-ru="Отправить заказ" 
+            data-lang-he="שלח הזמנה">
+      Submit Order
+    </button>
+  </form>
+
+  <p style="text-align:center; margin-top:1em;" 
+     data-lang-en="We will contact you to arrange payment." 
+     data-lang-ru="С вами свяжутся для оплаты." 
+     data-lang-he="ניצור איתך קשר כדי להסדיר את התשלום.">
+    We will contact you to arrange payment.
+  </p>
+</div>
+
+<script>
+  const translations = document.querySelectorAll("[data-lang-en]");
+  function setLang(lang) {
+    translations.forEach(el => {
+      const text = el.getAttribute("data-lang-" + lang);
+      if (text) el.textContent = text;
+    });
+  }
+
+  function calculateTotal() {
+    const comp = +document.querySelector('[name="competition_tickets"]').value || 0;
+    const gala = +document.querySelector('[name="gala_tickets"]').value || 0;
+    let total = comp * 40 + gala * 60;
+    const count = comp + gala;
+    if (count >= 3) {
+      total = Math.round(total * 0.65); // 35% discount
+    }
+    document.getElementById("totalDisplay").textContent = (langLabel('Total') || 'Total') + ": " + total + "₪";
+    document.getElementById("totalField").value = total + "₪";
+  }
+
+  function langLabel(label) {
+    const el = Array.from(translations).find(e => e.textContent.includes(label));
+    if (!el) return null;
+    return el.textContent.split(":")[0];
+  }
+
+  calculateTotal();
+</script>
+</body>
+</html>
