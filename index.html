@@ -10,6 +10,7 @@
       background: white;
       margin: 0;
       padding: 2em;
+      color: #333;
     }
     .container {
       max-width: 600px;
@@ -21,45 +22,60 @@
     }
     h2 {
       text-align: center;
+      margin-bottom: 1em;
     }
     label {
       display: block;
       margin-top: 1em;
+      margin-bottom: 0.3em;
+      font-weight: 600;
     }
-    input, button {
+    input[type="text"], input[type="tel"], input[type="email"] {
       width: 100%;
       padding: 0.6em;
       margin-top: 0.3em;
       border-radius: 5px;
       border: 1px solid #ccc;
       box-sizing: border-box;
+      font-size: 1em;
     }
     button {
       background: #e7c670;
       font-weight: bold;
       cursor: pointer;
       border: none;
+      border-radius: 5px;
+      padding: 0.6em 1.2em;
+      font-size: 1em;
+      margin-top: 1.5em;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #d4b654;
     }
     .lang-switch {
       display: flex;
       justify-content: center;
-      margin-bottom: 1em;
-      gap: 10px;
+      margin-bottom: 1.5em;
+      gap: 12px;
     }
     .lang-switch img {
-      width: 30px;
-      height: 20px;
+      width: 36px;
+      height: 24px;
       cursor: pointer;
       border: 2px solid transparent;
-      border-radius: 3px;
+      border-radius: 4px;
+      transition: border-color 0.3s ease;
     }
     .lang-switch img:hover {
       border-color: #e7c670;
     }
     .total {
-      font-weight: bold;
-      margin-top: 1em;
+      font-weight: 700;
+      margin-top: 1.2em;
       text-align: center;
+      font-size: 1.2em;
+      color: #444;
     }
     .hidden {
       display: none;
@@ -71,51 +87,124 @@
       from {opacity: 0; transform: translateY(10px);}
       to {opacity: 1; transform: translateY(0);}
     }
+
+    /* Стили для счетчиков */
+    .tickets-row {
+      display: flex;
+      gap: 1em;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+    .ticket-counter {
+      flex: 1 1 48%;
+    }
+    .counter-label {
+      margin-bottom: 0.3em;
+      font-weight: 600;
+    }
+    .counter-input {
+      display: flex;
+      align-items: center;
+      gap: 0.3em;
+    }
+    .counter-input button {
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      font-size: 20px;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      background: #e7c670;
+      border: none;
+      border-radius: 5px;
+      color: #333;
+      transition: background-color 0.3s ease;
+    }
+    .counter-input button:hover {
+      background: #d4b654;
+    }
+    .counter-input input[type="number"] {
+      width: 60px;
+      text-align: center;
+      padding: 0.3em;
+      font-size: 16px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      -moz-appearance: textfield;
+    }
+    /* Убираем стрелки у input number */
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+      -webkit-appearance: none; 
+      margin: 0; 
+    }
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
   </style>
 </head>
 <body>
 <div class="container">
 
-  <div class="lang-switch">
-    <img src="https://flagcdn.com/w40/gb.png" alt="EN" onclick="setLang('en')">
-    <img src="https://flagcdn.com/w40/ru.png" alt="RU" onclick="setLang('ru')">
-    <img src="https://flagcdn.com/w40/il.png" alt="HE" onclick="setLang('he')">
+  <div class="lang-switch" role="navigation" aria-label="Language selector">
+    <img src="https://flagcdn.com/w40/gb.png" alt="English" title="English" tabindex="0" onclick="setLang('en')" onkeypress="if(event.key==='Enter'){setLang('en')}">
+    <img src="https://flagcdn.com/w40/ru.png" alt="Русский" title="Русский" tabindex="0" onclick="setLang('ru')" onkeypress="if(event.key==='Enter'){setLang('ru')}">
+    <img src="https://flagcdn.com/w40/il.png" alt="עברית" title="עברית" tabindex="0" onclick="setLang('he')" onkeypress="if(event.key==='Enter'){setLang('he')}">
   </div>
 
   <h2 data-lang-en="Ticket Order" data-lang-ru="Заказ билетов" data-lang-he="הזמנת כרטיסים">Ticket Order</h2>
 
-  <form id="ticketForm" action="https://formsubmit.co/ajax/2mmedia.il@gmail.com" method="POST">
-    <label data-lang-en="Competition Day Tickets (40₪ each)" 
-           data-lang-ru="Билеты на конкурсный день (40₪ за шт.)" 
-           data-lang-he="כרטיסים ליום התחרות (₪40 כל אחד)">
-      Competition Day Tickets (40₪ each)
-    </label>
-    <input type="number" name="competition_tickets" min="0" value="0" oninput="calculateTotal()" required>
+  <form id="ticketForm" action="https://formsubmit.co/ajax/2mmedia.il@gmail.com" method="POST" novalidate>
+    <div class="tickets-row">
+      <div class="ticket-counter">
+        <label class="counter-label"
+               data-lang-en="Competition Day Tickets (40₪ each)" 
+               data-lang-ru="Билеты на конкурсный день (40₪ за шт.)" 
+               data-lang-he="כרטיסים ליום התחרות (₪40 כל אחד)">
+          Competition Day Tickets (40₪ each)
+        </label>
+        <div class="counter-input">
+          <button type="button" aria-label="Decrease competition tickets" onclick="changeCount('competition_tickets', -1)">−</button>
+          <input type="number" name="competition_tickets" min="0" value="0" oninput="calculateTotal()" required aria-required="true" aria-describedby="competitionHelp">
+          <button type="button" aria-label="Increase competition tickets" onclick="changeCount('competition_tickets', 1)">+</button>
+        </div>
+      </div>
 
-    <label data-lang-en="Gala Concert Tickets (60₪ each)" 
-           data-lang-ru="Билеты на гала-концерт (60₪ за шт.)" 
-           data-lang-he="כרטיסים לקונצרט הגאלה (₪60 כל אחד)">
-      Gala Concert Tickets (60₪ each)
-    </label>
-    <input type="number" name="gala_tickets" min="0" value="0" oninput="calculateTotal()" required>
+      <div class="ticket-counter">
+        <label class="counter-label"
+               data-lang-en="Gala Concert Tickets (60₪ each)" 
+               data-lang-ru="Билеты на гала-концерт (60₪ за шт.)" 
+               data-lang-he="כרטיסים לקונצרט הגאלה (₪60 כל אחד)">
+          Gala Concert Tickets (60₪ each)
+        </label>
+        <div class="counter-input">
+          <button type="button" aria-label="Decrease gala tickets" onclick="changeCount('gala_tickets', -1)">−</button>
+          <input type="number" name="gala_tickets" min="0" value="0" oninput="calculateTotal()" required aria-required="true" aria-describedby="galaHelp">
+          <button type="button" aria-label="Increase gala tickets" onclick="changeCount('gala_tickets', 1)">+</button>
+        </div>
+      </div>
+    </div>
 
-    <label data-lang-en="First Name" data-lang-ru="Имя" data-lang-he="שם פרטי">First Name</label>
-    <input type="text" name="first_name" required>
+    <label for="firstName" data-lang-en="First Name" data-lang-ru="Имя" data-lang-he="שם פרטי">First Name</label>
+    <input type="text" id="firstName" name="first_name" required aria-required="true" />
 
-    <label data-lang-en="Last Name" data-lang-ru="Фамилия" data-lang-he="שם משפחה">Last Name</label>
-    <input type="text" name="last_name" required>
+    <label for="lastName" data-lang-en="Last Name" data-lang-ru="Фамилия" data-lang-he="שם משפחה">Last Name</label>
+    <input type="text" id="lastName" name="last_name" required aria-required="true" />
 
-    <label data-lang-en="Phone Number" data-lang-ru="Номер телефона" data-lang-he="מספר טלפון">Phone Number</label>
-    <input type="tel" name="phone" required>
+    <label for="phone" data-lang-en="Phone Number" data-lang-ru="Номер телефона" data-lang-he="מספר טלפון">Phone Number</label>
+    <input type="tel" id="phone" name="phone" required aria-required="true" />
 
-    <label data-lang-en="Email (optional)" data-lang-ru="Email (необязательно)" data-lang-he="אימייל (לא חובה)">
-      Email (optional)
-    </label>
-    <input type="email" name="email">
+    <label for="email" data-lang-en="Email (optional)" data-lang-ru="Email (необязательно)" data-lang-he="אימייל (לא חובה)">Email (optional)</label>
+    <input type="email" id="email" name="email" />
 
     <div class="total" id="totalDisplay">Total: 0₪</div>
-    <input type="hidden" name="calculated_total" id="totalField">
-    <input type="text" name="_honey" style="display:none">
+    <input type="hidden" name="calculated_total" id="totalField" />
+
+    <!-- Honeypot to reduce spam -->
+    <input type="text" name="_honey" style="display:none" />
 
     <button type="submit" 
             data-lang-en="Submit Order" 
@@ -143,6 +232,7 @@
 </div>
 
 <script>
+  // Функция переключения языков
   const translations = document.querySelectorAll("[data-lang-en]");
   function setLang(lang) {
     translations.forEach(el => {
@@ -151,23 +241,58 @@
     });
   }
 
+  // Подсчет стоимости и скидки
   function calculateTotal() {
     const comp = +document.querySelector('[name="competition_tickets"]').value || 0;
     const gala = +document.querySelector('[name="gala_tickets"]').value || 0;
     let total = comp * 40 + gala * 60;
     const count = comp + gala;
     if (count >= 3) {
-      total = Math.round(total * 0.65); // 35% discount
+      total = Math.round(total * 0.65); // 35% скидка
     }
-    document.getElementById("totalDisplay").textContent = "Total: " + total + "₪";
+    const totalText = {
+      en: `Total: ${total}₪`,
+      ru: `Итого: ${total}₪`,
+      he: `סה"כ: ${total}₪`
+    };
+    // Определяем текущий язык по первому элемента (хак, можно улучшить)
+    let currentLang = 'en';
+    if (translations.length > 0) {
+      currentLang = [...translations].find(el => el.textContent === el.getAttribute("data-lang-ru")) ? 'ru' : 'en';
+      // Проверка для иврита — можно расширить
+      translations.forEach(el => {
+        if (el.textContent === el.getAttribute("data-lang-he")) currentLang = 'he';
+      });
+    }
+    // Вставляем нужный текст в totalDisplay
+    document.getElementById("totalDisplay").textContent = totalText[currentLang];
     document.getElementById("totalField").value = total + "₪";
   }
 
+  // Изменение количества билетов при нажатии +/-
+  function changeCount(name, delta) {
+    const input = document.querySelector(`[name="${name}"]`);
+    let val = +input.value || 0;
+    val += delta;
+    if (val < 0) val = 0;
+    input.value = val;
+    calculateTotal();
+  }
+
+  // Обновляем цену при загрузке
   calculateTotal();
 
+  // Отправка формы через AJAX
   document.getElementById("ticketForm").addEventListener("submit", function (e) {
     e.preventDefault();
     const form = e.target;
+    // Проверим, что заказ хотя бы 1 билет
+    const comp = +form.querySelector('[name="competition_tickets"]').value || 0;
+    const gala = +form.querySelector('[name="gala_tickets"]').value || 0;
+    if (comp + gala === 0) {
+      alert("Please select at least one ticket / Пожалуйста, выберите хотя бы один билет / אנא בחר לפחות כרטיס אחד");
+      return;
+    }
     const data = new FormData(form);
     fetch(form.action, {
       method: "POST",
@@ -181,16 +306,23 @@
       } else {
         alert("There was a problem sending the form.");
       }
+    }).catch(() => {
+      alert("There was a problem sending the form.");
     });
   });
 
+  // Сброс формы для нового заказа
   function resetForm() {
     const form = document.getElementById("ticketForm");
     form.reset();
     calculateTotal();
     form.classList.remove("hidden");
     document.getElementById("thankYou").classList.add("hidden");
+    document.getElementById("thankYou").classList.remove("fade");
   }
+
+  // Изначально устанавливаем язык английский
+  setLang('en');
 </script>
 </body>
 </html>
